@@ -97,7 +97,7 @@ async def doc(bot, update):
 
     # Metadata Adding Code
     _bool_metadata = await jishubotz.get_metadata(update.message.chat.id) 
-    
+    metadata_path = None
     if _bool_metadata:
         metadata = await jishubotz.get_metadata_code(update.message.chat.id)
         metadata_path = f"Metadata/{new_filename}"
@@ -144,11 +144,13 @@ async def doc(bot, update):
 
     await ms.edit("💠 Try To Upload...  ⚡")
     type = update.data.split("_")[1]
+    upload_path = metadata_path if (_bool_metadata and metadata_path and os.path.exists(metadata_path)) else file_path
+
     try:
         if type == "document":
             await bot.send_document(
                 update.message.chat.id,
-                document=metadata_path if _bool_metadata else file_path,
+                document=upload_path,
                 thumb=ph_path, 
                 caption=caption, 
                 progress=progress_for_pyrogram,
@@ -157,7 +159,7 @@ async def doc(bot, update):
         elif type == "video": 
             await bot.send_video(
                 update.message.chat.id,
-                video=metadata_path if _bool_metadata else file_path,
+                video=upload_path,
                 caption=caption,
                 thumb=ph_path,
                 duration=duration,
@@ -167,7 +169,7 @@ async def doc(bot, update):
         elif type == "audio": 
             await bot.send_audio(
                 update.message.chat.id,
-                audio=metadata_path if _bool_metadata else file_path,
+                audio=upload_path,
                 caption=caption,
                 thumb=ph_path,
                 duration=duration,
@@ -176,7 +178,13 @@ async def doc(bot, update):
 
 
     except Exception as e:          
-        os.remove(file_path)
+        if file_path and os.path.exists(file_path):
+            os.remove(file_path)
+        if metadata_path and os.path.exists(metadata_path):
+            try:
+                os.remove(metadata_path)
+            except:
+                pass
         if ph_path:
             os.remove(ph_path)
         return await ms.edit(f"**Error :** `{e}`")    
@@ -184,8 +192,13 @@ async def doc(bot, update):
     await ms.delete() 
     if ph_path:
         os.remove(ph_path)
-    if file_path:
+    if file_path and os.path.exists(file_path):
         os.remove(file_path)
+    if metadata_path and os.path.exists(metadata_path):
+        try:
+            os.remove(metadata_path)
+        except:
+            pass
 
 
 
