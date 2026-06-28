@@ -48,6 +48,15 @@ class Bot(Client):
             except:
                 print("Please Make This Is Admin In Your Log Channel")
 
+    async def stop(self, *args, **kwargs):
+        import asyncio
+        res = super().stop(*args, **kwargs)
+        if asyncio.iscoroutine(res) or asyncio.isfuture(res) or hasattr(res, '__await__'):
+            try:
+                await res
+            except Exception as e:
+                print(f"Error during stop: {e}")
+
 Bot().run()
 
 
